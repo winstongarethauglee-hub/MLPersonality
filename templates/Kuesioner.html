@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <script src="{{ url_for('static', filename='Theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='Notifikasi.js') }}"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuesioner - ML Personality</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dark-mode.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item-active { 
+            background-color: #3b82f6; 
+            color: white !important; 
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2); 
+        }
+        
+        .btn-choice-active { 
+            background-color: #2563eb !important; 
+            color: white !important; 
+            border-color: #2563eb !important; 
+        }
+
+        /* Dark mode dikelola oleh Theme.js */
+    </style>
+</head>
+<body class="flex min-h-screen relative overflow-x-hidden">
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-5 md:p-8 flex items-center justify-between md:justify-start gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 md:w-11 md:h-11 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200">
+                    <i class="fas fa-brain text-white text-lg md:text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-gray-800 leading-tight text-sm">ML Personality</h1>
+                    <p class="text-[10px] text-blue-500 font-extrabold uppercase tracking-widest">Analisis</p>
+                </div>
+            </div>
+            <button class="md:hidden text-gray-500 hover:text-gray-800" onclick="toggleSidebar()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 px-3 md:px-4 space-y-1 md:space-y-2 mt-2 md:mt-4">
+            <a href="{{ url_for('index') }}" class="sidebar-item-active flex items-center gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl transition-all">
+                <i class="fas fa-layer-group"></i>
+                <span class="font-bold text-sm">Kuesioner</span>
+            </a>
+
+            <a href="{{ url_for('hasil') }}" class="flex items-center gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-4 text-gray-500 hover:bg-gray-50 rounded-xl md:rounded-2xl transition-all">
+                <i class="fas fa-chart-pie"></i>
+                <span class="font-bold text-sm">Hasil Analisis</span>
+            </a>
+
+            <a href="{{ url_for('tentang') }}" class="flex items-center gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-4 text-gray-500 hover:bg-gray-50 rounded-xl md:rounded-2xl transition-all">
+                <i class="fas fa-id-card"></i>
+                <span class="font-bold text-sm">Tentang</span>
+            </a>
+        </nav>
+
+        <div class="p-4 md:p-6 border-t border-gray-100">
+            <a href="{{ url_for('pengaturan') }}" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl text-sm transition-all mb-3">
+                <i class="fas fa-cog w-4"></i>
+                <span class="font-bold text-sm">Pengaturan</span>
+            </a>
+
+            <div class="flex items-center gap-3 px-3 md:px-4 py-3 md:py-4 bg-slate-50 rounded-2xl md:rounded-3xl mb-4">
+                <div class="w-9 h-9 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-black ring-4 ring-blue-50">
+                    22
+                </div>
+                <div>
+                    <p class="text-[12px] font-black text-gray-800 leading-none">2244002</p>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase">Winston Gareth</span>
+                </div>
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="flex items-center justify-center gap-2 w-full py-3 text-red-500 hover:bg-red-50 rounded-xl text-xs font-black transition-all">
+                <i class="fas fa-power-off"></i>
+                <span>Keluar Sistem</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 w-full ml-0 md:ml-64 p-4 md:p-10 transition-all duration-300">
+        
+        <div class="w-full flex justify-between md:justify-end items-center gap-4 mb-8">
+            <button id="sidebarToggle" class="md:hidden text-gray-800 focus:outline-none" onclick="toggleSidebar()">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button onclick="toggleNotifPanel()" class="relative p-2 text-orange-400 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer">
+                        <i class="fas fa-bell"></i>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] font-black items-center justify-center border-2 border-white" style="display:none"></span>
+                    </button>
+                    <div id="notifOverlay" class="fixed inset-0 z-40 hidden" onclick="toggleNotifPanel()"></div>
+                    <div id="notifPanel" class="hidden absolute right-0 top-12 w-[340px] md:w-[400px] bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-gray-100 z-50 overflow-hidden" style="max-height: 70vh;">
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                            <h4 class="font-black text-gray-800 text-sm">Notifikasi</h4>
+                            <button onclick="hapusSemuaNotifikasi()" class="text-[11px] font-bold text-red-400 hover:text-red-600 transition-colors">Hapus Semua</button>
+                        </div>
+                        <div id="notifListContainer" class="overflow-y-auto" style="max-height: calc(70vh - 60px);"></div>
+                    </div>
+                </div>
+                <div class="hidden md:flex w-10 h-10 bg-blue-500 rounded-full items-center justify-center text-white font-bold shadow-md">
+                    22
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto mb-6 md:mb-10">
+            <h2 class="text-2xl md:text-4xl font-black text-gray-900 mb-2 md:mb-4 tracking-tight">Tes Kepribadian</h2>
+            <p class="text-xs md:text-base text-gray-500 leading-relaxed mb-5 md:mb-8">
+                Jawab 7 pertanyaan berikut dengan jujur. Pertanyaan ini langsung sesuai dengan fitur dataset yang digunakan untuk melatih model, sehingga perbandingan antar algoritma bersifat <strong>apple-to-apple</strong>.
+            </p>
+
+            <div class="flex justify-between items-end mb-2 md:mb-3">
+                <span class="text-xs md:text-sm font-bold text-gray-700">Progres: <span id="progress-text">0</span> dari 7</span>
+                <span class="text-xs md:text-base font-black text-blue-600" id="progress-percent">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 md:h-3 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-500 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <form action="{{ url_for('analyze') }}" method="POST" id="quizForm" onsubmit="sessionStorage.removeItem('riwayatDisimpanSesiIni');">
+            <div class="max-w-4xl mx-auto space-y-4 md:space-y-8 mb-10 md:mb-14">
+                <script>
+                    const questions = [
+                        { text: "Berapa jam waktu yang Anda habiskan sendirian per hari?", type: "range", min: 0, max: 10, step: 1, unit: "jam", feature: "Time_spent_Alone" },
+                        { text: "Apakah Anda memiliki ketakutan tampil di depan umum (demam panggung)?", type: "binary", feature: "Stage_fear" },
+                        { text: "Berapa kali Anda menghadiri acara sosial per bulan?", type: "range", min: 0, max: 10, step: 1, unit: "kali", feature: "Social_event_attendance" },
+                        { text: "Berapa kali Anda pergi keluar rumah untuk bersosialisasi per minggu?", type: "range", min: 0, max: 10, step: 1, unit: "kali", feature: "Going_outside" },
+                        { text: "Apakah Anda merasa lelah/terkuras setelah bersosialisasi?", type: "binary", feature: "Drained_after_socializing" },
+                        { text: "Berapa jumlah teman dekat dalam lingkaran pertemanan Anda?", type: "range", min: 0, max: 15, step: 1, unit: "orang", feature: "Friends_circle_size" },
+                        { text: "Berapa kali Anda memposting di media sosial per minggu?", type: "range", min: 0, max: 10, step: 1, unit: "kali", feature: "Post_frequency" }
+                    ];
+
+                    document.write(questions.map((q, i) => {
+                        let inputHtml = '';
+                        if (q.type === 'binary') {
+                            inputHtml = `
+                                <input type="hidden" name="q${i+1}" id="input_q${i+1}" value="">
+                                <div class="grid grid-cols-2 gap-3 md:gap-6">
+                                    <button type="button" onclick="setVal(${i+1}, 1, this)" class="py-2.5 md:py-4 px-4 md:px-6 border-2 border-gray-100 rounded-lg md:rounded-xl hover:border-blue-500 hover:bg-blue-50 text-gray-600 text-sm md:text-base font-bold transition-all btn-choice">
+                                        Ya
+                                    </button>
+                                    <button type="button" onclick="setVal(${i+1}, 0, this)" class="py-2.5 md:py-4 px-4 md:px-6 border-2 border-gray-100 rounded-lg md:rounded-xl hover:border-blue-500 hover:bg-blue-50 text-gray-600 text-sm md:text-base font-bold transition-all btn-choice">
+                                        Tidak
+                                    </button>
+                                </div>`;
+                        } else {
+                            inputHtml = `
+                                <input type="hidden" name="q${i+1}" id="input_q${i+1}" value="">
+                                <div class="flex flex-col gap-3">
+                                    <div class="flex items-center gap-4">
+                                        <input type="range" min="${q.min}" max="${q.max}" step="${q.step}" value="${Math.round(q.max / 2)}"
+                                            class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                            oninput="setSliderVal(${i+1}, this.value)">
+                                        <div class="flex items-center gap-1.5 min-w-[80px] justify-end">
+                                            <span id="display_q${i+1}" class="text-xl md:text-2xl font-black text-blue-600">-</span>
+                                            <span class="text-xs md:text-sm text-gray-400 font-bold">${q.unit}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] md:text-xs text-gray-400 font-bold px-1">
+                                        <span>${q.min} ${q.unit}</span>
+                                        <span>${q.max} ${q.unit}</span>
+                                    </div>
+                                </div>`;
+                        }
+
+                        return `
+                        <div class="bg-white p-4 md:p-10 rounded-2xl md:rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                            <div class="flex items-start gap-3 md:gap-5 mb-4 md:mb-8">
+                                <div class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 text-blue-600 rounded-lg md:rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm md:text-base mt-0.5">
+                                    ${i + 1}
+                                </div>
+                                <div>
+                                    <p class="text-sm md:text-lg font-bold text-gray-800 leading-snug">${q.text}</p>
+                                    <span class="text-[10px] md:text-xs text-gray-400 font-bold uppercase tracking-wider mt-1 inline-block">Fitur: ${q.feature}</span>
+                                </div>
+                            </div>
+                            ${inputHtml}
+                        </div>`;
+                    }).join(''));
+                </script>
+            </div>
+
+            <div class="max-w-4xl mx-auto flex flex-col-reverse md:flex-row justify-between items-center mb-10 md:mb-20 gap-3 md:gap-4">
+                <button type="button" onclick="resetKuesioner()" class="w-full md:w-auto px-6 md:px-8 py-3 md:py-4 border-2 border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 font-bold transition-all text-sm md:text-base">
+                    <i class="fas fa-undo mr-2"></i> Mulai Ulang Tes
+                </button>
+                <button type="submit" id="submitBtn" class="w-full md:w-auto px-8 md:px-12 py-3 md:py-4 bg-gray-300 text-white rounded-xl font-black shadow-lg cursor-not-allowed transition-all text-sm md:text-base" disabled>
+                    Submit Jawaban <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        function toggleSidebar() { 
+            sidebar.classList.toggle('-translate-x-full'); 
+            sidebarOverlay.classList.toggle('hidden'); 
+        }
+
+        const TOTAL_QUESTIONS = 7;
+        let answered = 0;
+        const answeredQuestions = new Set();
+        const autoSaveEnabled = localStorage.getItem('autoSaveEnabled') === 'enabled';
+
+        function updateProgress() {
+            const percent = Math.round((answered / TOTAL_QUESTIONS) * 100);
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').innerText = answered;
+            document.getElementById('progress-percent').innerText = percent + '%';
+
+            if(answered === TOTAL_QUESTIONS) {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-blue-200');
+                submitBtn.removeAttribute('disabled');
+            }
+        }
+
+        function setVal(qIdx, val, btn) {
+            document.getElementById('input_q' + qIdx).value = val;
+            const parent = btn.parentElement;
+
+            const siblingButtons = parent.querySelectorAll('button');
+            siblingButtons.forEach(b => b.classList.remove('btn-choice-active', 'bg-blue-600', 'text-white', 'border-blue-600'));
+
+            btn.classList.add('btn-choice-active', 'bg-blue-600', 'text-white', 'border-blue-600');
+
+            if (!answeredQuestions.has(qIdx)) {
+                answeredQuestions.add(qIdx);
+                answered++;
+                updateProgress();
+            }
+
+            if (autoSaveEnabled) {
+                let savedAnswers = JSON.parse(localStorage.getItem('jawabanKuesioner') || '{}');
+                savedAnswers[qIdx] = val;
+                localStorage.setItem('jawabanKuesioner', JSON.stringify(savedAnswers));
+            }
+        }
+
+        function setSliderVal(qIdx, val) {
+            document.getElementById('input_q' + qIdx).value = val;
+            document.getElementById('display_q' + qIdx).innerText = val;
+
+            if (!answeredQuestions.has(qIdx)) {
+                answeredQuestions.add(qIdx);
+                answered++;
+                updateProgress();
+            }
+
+            if (autoSaveEnabled) {
+                let savedAnswers = JSON.parse(localStorage.getItem('jawabanKuesioner') || '{}');
+                savedAnswers[qIdx] = parseFloat(val);
+                localStorage.setItem('jawabanKuesioner', JSON.stringify(savedAnswers));
+            }
+        }
+
+        window.onload = function() {
+            if (typeof applyTheme === "function") {
+                applyTheme();
+            }
+
+            if (autoSaveEnabled) {
+                const savedAnswers = JSON.parse(localStorage.getItem('jawabanKuesioner') || '{}');
+                for (const [qIdx, val] of Object.entries(savedAnswers)) {
+                    const inputEl = document.getElementById('input_q' + qIdx);
+                    if (inputEl) {
+                        const container = inputEl.nextElementSibling;
+                        const buttons = container.querySelectorAll('.btn-choice');
+
+                        if (buttons.length > 0) {
+                            const btnTarget = val === 1 ? buttons[0] : buttons[1];
+                            if (btnTarget) {
+                                setVal(parseInt(qIdx), val, btnTarget);
+                            }
+                        } else {
+                            const slider = container.querySelector('input[type="range"]');
+                            if (slider) {
+                                slider.value = val;
+                                setSliderVal(parseInt(qIdx), val);
+                            }
+                        }
+                    }
+                }
+            } else {
+                localStorage.removeItem('jawabanKuesioner');
+            }
+        };
+
+        function resetKuesioner() {
+            localStorage.removeItem('jawabanKuesioner');
+            sessionStorage.removeItem('riwayatDisimpanSesiIni'); // Mengizinkan tes dicatat lagi
+            window.location.href = "{{ url_for('reset') }}";
+        }
+    </script>
+</body>
+</html>
